@@ -1,0 +1,33 @@
+[
+    {
+        "name": "Rozi",
+        "id": "1"
+    },
+    {
+        "name": "Ahmad",
+        "id": "2"
+    },
+    {
+        "name": "Nino",
+        "id": "3"
+    },
+    {
+        "id": "84c2cb02-6718-4859-94ef-b3ea5ff2446e",
+        "name": "Priyo"
+    },
+    {
+        "id": "96f8381d-ad3e-4f22-b8d1-69c8d54a7853",
+        "name": "Zul"
+    },
+    {
+        "name": "Purnama02",
+        "email": "purnama02@gmail.com",
+        "nohp": "02183910213dkjdshf"
+    },
+    {
+        "id": "d0a86050-7cd8-4875-8949-9239fac2b08e",
+        "name": "Didik",
+        "email": "didik02@gmail.com",
+        "nohp": "21321031283"
+    }
+]
