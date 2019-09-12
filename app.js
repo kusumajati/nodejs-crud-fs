@@ -1,13 +1,17 @@
+//set PORT to be deployed to heroku (BELUM DI BAHAS..)
+const PORT = process.env.PORT||3001
+
 const express = require('express')
 const app = express()
-//set PORT to be deployed to heroku
-const PORT = process.env.PORT||3001
 const uuid = require('uuid')
 var users = require('./user.json')
 const bodyParser = require('body-parser')
 const fs = require('fs')
-const user = require('./middleware/user')
+
+//log Middleware (ganti nama dari 'user' ke 'userMiddleware')
+const userMiddleware = require('./middleware/user')
 const log = require("./middleware/log")
+
 const multer = require('multer')
 //require nodejs 'path' to name the file uploaded according to the original extension
 const path = require('path')
@@ -50,7 +54,7 @@ app.get('/patch-image/:id/:imageId', (req,res)=>{
     var findIndex = users.findIndex(user => user.id === req.params.id)
     if(findIndex>-1){
         var pushed = {
-            id: users[findIndex].name,
+            name: users[findIndex].name,
             email: users[findIndex].email, 
             nohp:  users[findIndex].nohp,
             image: req.params.imageId
@@ -85,16 +89,7 @@ app.get('/', function (req, res) {
     res.send('Hellow world!')
 })
 
-app.get('/write-file-sync', (req, res) => {
-    fs.writeFile("text.js", "Hello World2", (err) => {
-        if (err) {
-            res.send(err)
-        } else {
-            res.send("success")
-        }
-    })
-})
-app.get('/user', user,log,  (req, res) => {
+app.get('/user', userMiddleware,log,  (req, res) => {
     res.send(users)
 })
 app.get('/user/:id', (req, res) => {
@@ -112,15 +107,14 @@ app.get('/user/:id', (req, res) => {
         })
     }
 })
-app.post('/user', upload.single('avatar'),(req, res) => {
+app.post('/user',(req, res) => {
     var pushed = { 
         name: req.body.name,
          nohp: req.body.nohp, 
          email: req.body.email, 
          id: uuid(), 
-         image:"/"+req.file.filename 
+         image: "https://ui-avatars.com/api/?name="+req.body.name
         }
-    console.log(req.body)
     users = [...users, pushed]
     fs.writeFile("user.json", JSON.stringify(users), (err) => {
         if (err) {
@@ -204,6 +198,19 @@ app.patch('/user/:id', (req, res) => {
         res.json({
             success: false,
             message: "user not found"
+        })
+    }
+})
+
+// EJS, BELUM DI BAHAS..
+app.get('/user/show/:id', (req,res)=>{
+    var user = users.find(user => user.id === req.params.id)
+    if (user) {
+        res.render("UserShow.ejs",{user:user})
+    } else {
+        res.json({
+            success: false,
+            message: "user not found",
         })
     }
 })
