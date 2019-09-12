@@ -9,6 +9,7 @@ const user = require('./middleware/user')
 const log = require("./middleware/log")
 const multer = require('multer')
 const path = require('path')
+var timeago = require('timeago');
 
 
 var storage = multer.diskStorage({
@@ -20,9 +21,8 @@ var storage = multer.diskStorage({
     }
   })
    
-  var upload = multer({ storage: storage })
+  var upload = multer({ dest:'public/uploads/' })
 
-// var upload = multer({ dest: 'http://res.cloudinary.com/ninocloudinary' })
 
 app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
@@ -30,9 +30,7 @@ app.use(bodyParser.json())
 app.use(express.static('public'))
 
 
-app.use('/static', express.static('public'))
-
-
+//upload image using multer and express' res.redirect to pass the 'req.file.filename'as params to be handled
 app.post('/upload/:id',  upload.single('avatar'), (req,res)=>{
     var findIndex = users.findIndex(user => user.id === req.params.id)
     if(findIndex>-1){
@@ -41,6 +39,7 @@ app.post('/upload/:id',  upload.single('avatar'), (req,res)=>{
 
     }
 })
+//handle upload image using params passed from '/upload/:id'
 app.get('/patch-image/:id/:imageId', (req,res)=>{
     var findIndex = users.findIndex(user => user.id === req.params.id)
     if(findIndex>-1){
@@ -66,23 +65,10 @@ app.get('/patch-image/:id/:imageId', (req,res)=>{
             }
         })
     }else{
-
-
     }
 
 })
-app.get("/user/show/:id",(req,res)=>{
-    var user = users.find(user => user.id === req.params.id)
-    if (user) {
-        res.render("UserShow.ejs", {user:user})
-    } else {
-        res.json({
-            success: false,
-            message: "user not found",
-        })
-    }
 
-})
 
 app.get('/', function (req, res) {
     // console.log("Hello World")
