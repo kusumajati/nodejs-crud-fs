@@ -36,8 +36,8 @@ var storage = multer.diskStorage({
   var upload = multer({ storage: storage })
 
 
-// upload handler,  using 'upload' middleware 
-app.post('/upload/:id',  upload.single('avatar'), (req,res)=>{
+// upload handler,  using 'upload' middleware, tak ganti methodnya jadi 'patch' biar lebih masuk akal 
+app.patch('/upload/:id',  upload.single('avatar'), (req,res)=>{
     var findIndex = users.findIndex(user => user.id === req.params.id)
     if(findIndex>-1){
        // express' res.redirect to pass the 'req.file.filename'as params to be handled
@@ -54,6 +54,7 @@ app.get('/patch-image/:id/:imageId', (req,res)=>{
     var findIndex = users.findIndex(user => user.id === req.params.id)
     if(findIndex>-1){
         var pushed = {
+            id: users[findIndex].id,
             name: users[findIndex].name,
             email: users[findIndex].email, 
             nohp:  users[findIndex].nohp,
@@ -70,7 +71,7 @@ app.get('/patch-image/:id/:imageId', (req,res)=>{
             } else {
                 res.json({
                     success: true,
-                    message: "new user created",
+                    message: "image updated",
                     data: pushed
                 })
             }
@@ -113,6 +114,7 @@ app.post('/user',(req, res) => {
          nohp: req.body.nohp, 
          email: req.body.email, 
          id: uuid(), 
+         //tak tambahin default avatar pake 'UI-Avatars API'
          image: "https://ui-avatars.com/api/?name="+req.body.name
         }
     users = [...users, pushed]
