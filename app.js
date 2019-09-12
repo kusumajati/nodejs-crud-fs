@@ -29,7 +29,7 @@ var storage = multer.diskStorage({
       cb(null, 'public')
     },
     filename: function (req, file, cb) {
-      cb(null, file.fieldname + '-' + Date.now())
+      cb(null, file.fieldname + '-' + Date.now()+path.extname(file.originalname))
     }
   })
   // create middleware 'upload' to be called in upload handler
@@ -58,7 +58,7 @@ app.get('/patch-image/:id/:imageId', (req,res)=>{
             name: users[findIndex].name,
             email: users[findIndex].email, 
             nohp:  users[findIndex].nohp,
-            image: req.params.imageId
+            image: "/"+req.params.imageId
         }
         users.splice(findIndex, 1, pushed)
         fs.writeFile("user.json", JSON.stringify(users), (err) => {
