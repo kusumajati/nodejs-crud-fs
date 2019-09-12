@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
-const PORT = process.env.PORT || 3001
+//set PORT to be deployed to heroku
+const PORT = process.env.PORT||3001
 const uuid = require('uuid')
 var users = require('./user.json')
 const bodyParser = require('body-parser')
@@ -8,20 +9,8 @@ const fs = require('fs')
 const user = require('./middleware/user')
 const log = require("./middleware/log")
 const multer = require('multer')
+//require nodejs 'path' to name the file uploaded according to the original extension
 const path = require('path')
-var timeago = require('timeago');
-
-
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'public')
-    },
-    filename: function (req, file, cb) {
-      cb(null, file.fieldname + '-' + Date.now()+path.extname(file.originalname)||".jpg")
-    }
-  })
-   
-  var upload = multer({ dest:'public/uploads/' })
 
 
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -30,13 +19,30 @@ app.use(bodyParser.json())
 app.use(express.static('public'))
 
 
-//upload image using multer and express' res.redirect to pass the 'req.file.filename'as params to be handled
+//set multer destination folder to path 'public' & to name the file uploaded to have extension using 'path.extname()' method
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'public')
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now())
+    }
+  })
+  // create middleware 'upload' to be called in upload handler
+  var upload = multer({ storage: storage })
+
+
+// upload handler,  using 'upload' middleware 
 app.post('/upload/:id',  upload.single('avatar'), (req,res)=>{
     var findIndex = users.findIndex(user => user.id === req.params.id)
     if(findIndex>-1){
+       // express' res.redirect to pass the 'req.file.filename'as params to be handled
         res.redirect('/patch-image/'+req.params.id+"/"+req.file.filename)
     }else{
-
+        res.json({
+            success:false,
+            message:"user not found"
+        })
     }
 })
 //handle upload image using params passed from '/upload/:id'
@@ -44,9 +50,10 @@ app.get('/patch-image/:id/:imageId', (req,res)=>{
     var findIndex = users.findIndex(user => user.id === req.params.id)
     if(findIndex>-1){
         var pushed = {
-            id: req.params.id, name: req.body.name || users[findIndex].name,
-            email: req.body.email || users[findIndex].email, nohp: req.body.nohp || users[findIndex].nohp
-            ,image: req.params.imageId
+            id: users[findIndex].name,
+            email: users[findIndex].email, 
+            nohp:  users[findIndex].nohp,
+            image: req.params.imageId
         }
         users.splice(findIndex, 1, pushed)
         fs.writeFile("user.json", JSON.stringify(users), (err) => {
@@ -65,15 +72,17 @@ app.get('/patch-image/:id/:imageId', (req,res)=>{
             }
         })
     }else{
+        res.json({
+            success:false,
+            message:"user not found"
+        })
     }
 
 })
 
 
-app.get('/', function (req, res) {
-    // console.log("Hello World")
-    
-    res.redirect('/user')
+app.get('/', function (req, res) {    
+    res.send('Hellow world!')
 })
 
 app.get('/write-file-sync', (req, res) => {
